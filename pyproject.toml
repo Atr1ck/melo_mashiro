@@ -5,7 +5,7 @@ description = "Default template for PDM package"
 authors = [
     {name = "Atr1ck", email = "3126670240@qq.com"},
 ]
-dependencies = ["melobot[onebot]>=3.1.2"]
+dependencies = ["melobot[onebot]>=3.1.2", "pillow>=11.1.0", "requests>=2.32.3"]
 requires-python = "==3.13.*"
 readme = "README.md"
 license = {text = "MIT"}

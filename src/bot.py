@@ -1,7 +1,12 @@
+import cairosvg
 from melobot import Bot, PluginPlanner
 from melobot.protocols.onebot.v11 import ForwardWebSocketIO, OneBotV11Protocol, Adapter
 from configparser import ConfigParser
 from plugins.bandori import bandori_cards, bandori_player
+from lxml import etree
+
+# 强制cairosvg使用lxml
+cairosvg.parser.NODE_PARSER = etree.XMLParser(resolve_entities=False, no_network=True)
 
 config = ConfigParser()
 
@@ -17,4 +22,4 @@ if __name__ == "__main__":
         .add_protocol(OneBotV11Protocol(ForwardWebSocketIO("ws://127.0.0.1:3001")))
     )
     bot.load_plugins([plugin])
-    bot.run()   
+    bot.run(debug=True)   

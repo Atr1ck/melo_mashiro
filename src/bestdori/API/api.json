@@ -63,7 +63,7 @@
         "llsif": "/api/misc/llsif.{index}.json"
     },
     "player": {
-        "info": "/api/player/{server}/{id}"
+        "info": "/api/player/{server}/{id}?mode=2"
     },
     "tracker": {
         "eventtop": "/api/eventtop/data",

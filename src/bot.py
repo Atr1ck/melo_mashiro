@@ -22,4 +22,4 @@ if __name__ == "__main__":
         .add_protocol(OneBotV11Protocol(ForwardWebSocketIO("ws://127.0.0.1:3001")))
     )
     bot.load_plugins([plugin])
-    bot.run(debug=True)   
+    bot.run(debug=True)

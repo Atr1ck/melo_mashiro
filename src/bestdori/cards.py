@@ -8,6 +8,7 @@ config = ConfigParser()
 config.read("src/config.conf")
 
 API_PATH = config.get("Bestdori", "API_PATH")
+CACHE_PATH = config.get("Cache", "CACHE_PATH")
 
 class Card():
     def __init__(self, card_info, id, illust):
@@ -39,7 +40,10 @@ class Card():
     
     def get_thumb_frame(self) -> str:
         # 缩略图边框
-        return f'https://bestdori.com/res/image/card-{self.rarity}.png'
+        if self.rarity >= 2:
+            return f'https://bestdori.com/res/image/card-{self.rarity}.png'
+        else:
+            return f'https://bestdori.com/res/image/card-{self.rarity}-{self.attr}.png'
 
     def get_frame(self) -> str:
         # 卡面边框
@@ -58,7 +62,7 @@ class Card():
         return f'https://bestdori.com/res/icon/band_{self.bandId}.svg'
 
 async def get_card(id, illust):
-    client = AsyncAPIClient("https://bestdori.com", API_PATH)
+    client = AsyncAPIClient("https://bestdori.com", API_PATH, CACHE_PATH)
     card_info = await client.fetch(client.api_endpoints["cards"]["info"].format(id=id))
     card = Card(card_info, id, illust)
     return card

@@ -6,6 +6,7 @@ config = ConfigParser()
 config.read("src/config.conf")
 
 API_PATH = config.get("Bestdori", "API_PATH")
+CACHE_PATH = config.get("Cache", "CACHE_PATH")
 
 class Degree():
     def __init__(self, degree_info, id):
@@ -29,7 +30,7 @@ class Degree():
         return icon_url
 
 async def get_degree(id):
-    client = AsyncAPIClient("https://bestdori.com", API_PATH)
+    client = AsyncAPIClient("https://bestdori.com", API_PATH, CACHE_PATH)
     degree_info = await client.fetch(client.api_endpoints["all"]["degrees"].format(index=3))
     degree = Degree(degree_info, id)
     return degree

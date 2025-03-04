@@ -2,6 +2,7 @@ import asyncio
 import base64
 import aiohttp
 import cairosvg
+import diskcache as dc
 import lxml.etree as etree
 from wand.image import Image as WandImage
 from bestdori.API.api import AsyncAPIClient
@@ -17,6 +18,9 @@ config.read("src/config.conf")
 
 API_PATH = config.get("Bestdori", "API_PATH")
 FONTS_PATH = config.get("Fonts", "FONTS_PATH")
+CACHE_PATH = config.get("Cache", "CACHE_PATH")
+
+cache = dc.Cache(CACHE_PATH)
 
 class Player:
     def __init__(self, data):
@@ -86,20 +90,30 @@ class Player:
         return base64_str
 
 async def download_image(url):
-    """异步下载图片，支持 SVG 转换"""
-    print(url)
+    """异步下载图片，支持 SVG 转换和本地缓存"""
+
+    # 检查缓存中是否存在该 URL 的图片
+    if url in cache:
+        print(f"从缓存中读取图片: {url}")
+        return Image.open(BytesIO(cache[url])).convert("RGBA")
+
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
             if response.status == 200:
                 content = await response.read()
-                
-                if url.endswith(".svg"):
-                    # 将 SVG 转换为 PNG，使用线程池避免阻塞事件循环
-                    png_data = cairosvg.svg2png(bytestring=content) 
-                    return Image.open(BytesIO(png_data)).convert("RGBA")
-                
-                return Image.open(BytesIO(content)).convert("RGBA")
 
+                if url.endswith(".svg"):
+                    # 将 SVG 转换为 PNG
+                    png_data = cairosvg.svg2png(bytestring=content)
+                    image_data = png_data
+                else:
+                    image_data = content
+
+                # 将图片数据保存到缓存
+                cache[url] = image_data
+                print(f"图片已缓存: {url}")
+
+                return Image.open(BytesIO(image_data)).convert("RGBA")
             else:
                 raise Exception(f"无法下载图片: {url}, 状态码: {response.status}")
 
@@ -164,7 +178,7 @@ def create_info_box(user_name: str, rank: int, introduction: str, degrees: list[
     draw.text((text_x_center(introduction, info_box, intro_font), 80), introduction, fill="gray", font=intro_font)
 
 
-    start_x = (info_box.width - 175) // 2 if len(degrees) == 1 else (info_box.width - (175 + 50) * len(degrees))
+    start_x = (info_box.width - 175) // 2 if len(degrees) == 1 else (info_box.width - (175 + 50) * len(degrees)) // 2
     start_y = 150
     for i, degree in enumerate(degrees):
         info_box.paste(degree, (start_x + i * (175 + 50), 150), degree)
@@ -203,7 +217,12 @@ async def fetch_and_resize(image_url: str, size: tuple[int, int]):
     return image.resize(size)  # 调整大小
 
 async def get_player(id):
-    client = AsyncAPIClient("https://bestdori.com", API_PATH)
-    player_info = await client.fetch(client.api_endpoints["player"]["info"].format(server="cn", id=id))
+    client = AsyncAPIClient("https://bestdori.com", API_PATH, CACHE_PATH)
+    api_url = client.api_endpoints["player"]["info"].format(server="cn", id=id)
+    player_info = await client.fetch(api_url, cache=False)
+    if player_info["data"]["profile"] == None:
+        client.delete_cache(api_url)
+        print("数据无效，已删除")
+        return "Unvalid Data"
     player = Player(player_info)
     return player

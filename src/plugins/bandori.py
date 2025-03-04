@@ -1,4 +1,4 @@
-import base64
+import time
 from melobot.protocols.onebot.v11 import Adapter, ImageSegment, on_message, MessageEvent
 from melobot.utils.parse import CmdParser, CmdArgs
 from bestdori.cards import get_card
@@ -42,9 +42,15 @@ async def bandori_player(adapter: Adapter, event: MessageEvent, args: CmdArgs):
     """
     .bandori player id
     """
-    print("正在获取玩家信息")
+    start_time = time.time()
+    print(f"正在获取玩家信息: {args.vals[0]}")
     player = await get_player(id=args.vals[0])
-    print("已获取玩家信息，绘制图片")
-    base64_str = await player.player_dataImg()
-    img = ImageSegment(file=base64_str)
-    await adapter.send(img)
+    if player == "Unvalid Data":
+        await adapter.send("信息获取失败")
+    else:
+        print("已获取玩家信息，绘制图片")
+        base64_str = await player.player_dataImg()
+        img = ImageSegment(file=base64_str)
+        await adapter.send(img)
+        end_time2 = time.time()
+        print("time:", end_time2 - start_time)

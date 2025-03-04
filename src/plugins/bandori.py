@@ -3,6 +3,7 @@ from melobot.protocols.onebot.v11 import Adapter, ImageSegment, on_message, Mess
 from melobot.utils.parse import CmdParser, CmdArgs
 from bestdori.cards import get_card
 from bestdori.player import get_player
+from bestdori.tracker import get_now_event
 
 @on_message(parser=CmdParser(
     cmd_start=[".", "/"],
@@ -11,7 +12,7 @@ from bestdori.player import get_player
 ))
 async def bandori_cards(adapter: Adapter, event: MessageEvent, args: CmdArgs):
     """
-    .bandori card id img_type card_type
+    .bandori_card id img_type card_type
     """
     try:
         print("正在获取图片")
@@ -40,7 +41,7 @@ async def bandori_cards(adapter: Adapter, event: MessageEvent, args: CmdArgs):
 ))
 async def bandori_player(adapter: Adapter, event: MessageEvent, args: CmdArgs):
     """
-    .bandori player id
+    .bandori_player id
     """
     start_time = time.time()
     print(f"正在获取玩家信息: {args.vals[0]}")
@@ -54,3 +55,17 @@ async def bandori_player(adapter: Adapter, event: MessageEvent, args: CmdArgs):
         await adapter.send(img)
         end_time2 = time.time()
         print("time:", end_time2 - start_time)
+
+@on_message(parser=CmdParser(
+    cmd_start = [".", "/"],
+    cmd_sep = [" "],
+    targets=["bandori_event"]
+))
+async def bandori_event(adapter: Adapter, event: MessageEvent, args: CmdArgs):
+    """
+    .bandori_event tier
+    """
+    print("正在获取活动分数信息")
+    image_base64 = await get_now_event(tier=args.vals[0])
+    image = ImageSegment(file=image_base64)
+    await adapter.send(image)

@@ -67,7 +67,7 @@
     },
     "tracker": {
         "eventtop": "/api/eventtop/data",
-        "eventtracker": "/api/tracker/data"
+        "eventtracker": "/api/tracker/data?server={server}&event={eventId}&tier={tier}"
     },
     "all": {
         "skills": "/api/skills/all.{index}.json",

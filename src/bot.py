@@ -2,7 +2,7 @@ import cairosvg
 from melobot import Bot, PluginPlanner
 from melobot.protocols.onebot.v11 import ForwardWebSocketIO, OneBotV11Protocol, Adapter
 from configparser import ConfigParser
-from plugins.bandori import bandori_cards, bandori_player
+from plugins.bandori import bandori_cards, bandori_player, bandori_event
 from lxml import etree
 
 # 强制cairosvg使用lxml
@@ -12,7 +12,7 @@ config = ConfigParser()
 
 config.read("src/config.conf")
 
-plugin = PluginPlanner(version="1.0.0", flows=[bandori_cards, bandori_player])
+plugin = PluginPlanner(version="1.0.0", flows=[bandori_cards, bandori_player, bandori_event])
 
 if __name__ == "__main__":
     bot = (
